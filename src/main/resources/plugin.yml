@@ -1,0 +1,23 @@
+name: BlueMap_Residence
+version: ${project.version}
+main: me.Mixer.bluemapresidence.Main
+authors: [CZMixer]
+depend: [ BlueMap, Residence ]
+softdepend: [ PlaceholderAPI ]
+api-version: 1.13
+
+commands:
+  bluemapresidence:
+    aliases:
+      - blueres
+      - bluemapres
+    description: Reload plugin config
+
+permissions:
+  blueres.updatecheck:
+    description: Send updates on join
+    default: op
+
+  blueres.reload:
+    description: Reload plugin command
+    default: op

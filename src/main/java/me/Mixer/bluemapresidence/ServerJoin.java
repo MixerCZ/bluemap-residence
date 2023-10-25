@@ -1,0 +1,34 @@
+package me.Mixer.bluemapresidence;
+
+import de.bluecolored.bluemap.api.BlueMapAPI;
+import de.bluecolored.bluemap.api.BlueMapMap;
+import de.bluecolored.bluemap.api.markers.ExtrudeMarker;
+import de.bluecolored.bluemap.api.markers.MarkerSet;
+import de.bluecolored.bluemap.api.markers.POIMarker;
+import de.bluecolored.bluemap.api.markers.ShapeMarker;
+import de.bluecolored.bluemap.api.math.Shape;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+public class ServerJoin implements Listener {
+	
+	static Main plugin;
+	public ServerJoin(Main instance) {
+		plugin = instance;
+	}
+
+	@EventHandler
+	public void Join(PlayerJoinEvent e)  {
+		if(e.getPlayer().hasPermission("blueres.updatecheck")) {
+			new UpdateChecker(plugin, 107389).getVersion(version -> {
+				if(!plugin.getDescription().getVersion().equalsIgnoreCase(version)) {
+					e.getPlayer().sendMessage(plugin.Placeholder(e.getPlayer(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.new_update"))));
+					e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&a" + plugin.BMResLinkSpigot));
+				}
+			});
+		}
+	}
+	
+}
