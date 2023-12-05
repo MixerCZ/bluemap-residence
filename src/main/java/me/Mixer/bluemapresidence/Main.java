@@ -222,14 +222,25 @@ public class Main extends JavaPlugin {
                     //Create marker set
                     final MarkerSet markerSetRes = map.getMarkerSets().getOrDefault(MarkerSetIdResidence, MarkerSet.builder().label(MarkerSetLabelResidence).build());
                     String flags = ""; //Define string flags
+                    int flagCount = 0; // Define flag count (to maxFlags config)
                     //Load config detail and register placeholders
                     String ConfDetail = getConfig().getString("marker.detail");
                     ConfDetail = ConfDetail.replace("[ResName]", res.getName());
                     ConfDetail = ConfDetail.replace("[OwnerName]", res.getRPlayer().getName());
 
+                    int maxFlags = getConfig().getInt("marker.maxFlags", -1);
+
                     //Add all use flags to flags string
                     for(Map.Entry<String, Boolean> flag : res.getPermissions().getFlags().entrySet()) {
-                        flags += flag.getKey() + ": " + flag.getValue() + "<br>";
+                        String toFlags = getConfig().getString("marker.flagDetail", "[FlagKey]: [FlagValue]<br>");
+                        toFlags = toFlags.replace("[FlagKey]", flag.getKey());
+                        toFlags = toFlags.replace("[FlagValue]", flag.getValue().toString());
+                        if(maxFlags != 0 && flagCount < maxFlags) { //If flags enabled and flagCount is right
+                            flags += toFlags;
+                            flagCount++;
+                        } else if(maxFlags < 0) { //Unlimited flags
+                            flags += toFlags;
+                        }
                     }
 
                     //Register PlaceholderAPI placeholders

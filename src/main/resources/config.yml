@@ -12,9 +12,17 @@ marker:
   # Set marker label name
   name: "Residences"
 
-  # Set marker detail (displayed on click) - placeholders: [ResName], [OwnerName], all of the PlaceholderAPI (if installed)
+  # Set marker detail (displayed on click) - placeholders: [ResName], [OwnerName]
   # Alsa you can use basic html tags like <i></i> for italic, <b></b> for bold or <br> for break
   detail: "<b>[ResName]</b> owned by [OwnerName]<br><br><b>Flags:</b><br>"
+
+  # Set max flags which can display
+  # Set to 0 to disable flags or -1 to unlimited
+  maxFlags: -1
+
+  # Set flag detail (displayed on click) - placeholders: [FlagKey], [FlagValue]
+  # Alsa you can use basic html tags like <i></i> for italic, <b></b> for bold or <br> for break
+  flagDetail: "[FlagKey]: [FlagValue]<br>"
 
   #Marker type - values: rectangle (default), circle, ellipse, point
   #2D markers: rectangle2d, circle2d, ellipse2d
