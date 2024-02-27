@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player) {
             if(!sender.hasPermission("blueres.reload")) {
-                sender.sendMessage(cfg.Placeholder((Player) sender, ChatColor.translateAlternateColorCodes('&',cfg.getConfig().getString("messages.no_permissions"))));
+                sender.sendMessage(cfg.Placeholder((Player) sender, ChatColor.translateAlternateColorCodes('&',cfg.getConfig().getString("messages.no_permissions", "No permissions!"))));
                 return true;
             }
         }
@@ -30,7 +29,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
         cfg.reloadConfig();
         cfg.refreshPl();
 
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', cfg.getConfig().getString("messages.reload_successfully")));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', cfg.getConfig().getString("messages.reload_successfully", "Reloaded successfully.")));
         return false;
     }
 

@@ -18,7 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,14 +64,14 @@ public class Main extends JavaPlugin {
 
     public boolean papiState;
 
+    private Scheduler.Task updateTimer;
+
     @Override
     public void onEnable() {
         registerFiles();
         MarkerSetLabelResidence = getConfig().getString("marker.name", "Residences");
         new UpdateChecker(this, 107389).getVersion(version -> {
-            if (this.getDescription().getVersion().equalsIgnoreCase(version)) {
-                // info("I'm up to date.");
-            } else {
+            if (!this.getPluginMeta().getVersion().equalsIgnoreCase(version)) {
                 info("There is a new update available. " + BMResLinkSpigot);
             }
         });
@@ -101,23 +101,20 @@ public class Main extends JavaPlugin {
         metrics.addCustomChart(new Metrics.SimplePie("update_on_change", () -> String.valueOf(getConfig().getBoolean("update.onchange"))));
         metrics.addCustomChart(new Metrics.SimplePie("update_on_period", () -> String.valueOf(getConfig().getBoolean("update.onperiod"))));
         metrics.addCustomChart(new Metrics.SimplePie("config_auto_update", () -> String.valueOf(getConfig().getBoolean("config.auto_update"))));
-        metrics.addCustomChart(new Metrics.AdvancedPie("marker_type", new Callable<Map<String, Integer>>() {
-            @Override
-            public Map<String, Integer> call() throws Exception {
-                Map<String, Integer> valueMap = new HashMap<>();
+        metrics.addCustomChart(new Metrics.AdvancedPie("marker_type", () -> {
+            Map<String, Integer> valueMap = new HashMap<>();
 
-                switch (getConfig().getString("marker.type").toLowerCase()) {
-                    case "point": valueMap.put("point",1); break;
-                    case "circle": valueMap.put("circle",1); break;
-                    case "ellipse": valueMap.put("ellipse",1); break;
-                    case "ellipse2d": valueMap.put("ellipse2D",1); break;
-                    case "rectangle2d": valueMap.put("rectangle2D",1); break;
-                    case "circle2d": valueMap.put("circle2D", 1); break;
-                    default: valueMap.put("rectangle",1); break;
-                }
-
-                return valueMap;
+            switch (Objects.requireNonNull(getConfig().getString("marker.type")).toLowerCase()) {
+                case "point": valueMap.put("point",1); break;
+                case "circle": valueMap.put("circle",1); break;
+                case "ellipse": valueMap.put("ellipse",1); break;
+                case "ellipse2d": valueMap.put("ellipse2D",1); break;
+                case "rectangle2d": valueMap.put("rectangle2D",1); break;
+                case "circle2d": valueMap.put("circle2D", 1); break;
+                default: valueMap.put("rectangle",1); break;
             }
+
+            return valueMap;
         }));
 
         pm.registerEvents(new ServerJoin(this), this);
@@ -128,23 +125,24 @@ public class Main extends JavaPlugin {
             if(res.isEnabled()) {
                 if(getConfig().getBoolean("update.onperiod", true)) {
                     final long updateInterval = Math.max(1, getConfig().getLong("update.period", 300));
-                    getServer().getScheduler().runTaskTimer(this, this::refreshMarkers, 0, 20 * updateInterval);
+                    updateTimer = Scheduler.runTimer(this::refreshMarkers, 0, 20 * updateInterval);
+                   // getServer().getScheduler().runTaskTimer(this, this::refreshMarkers, 0, 20 * updateInterval);
                 }
 
                 if(getConfig().getBoolean("update.onchange", true)) {
                     pm.registerEvents(new EventList(this), this);
                 }
-                info("Version " + this.getDescription().getVersion() + " is activated");
+                info("Version " + this.getPluginMeta().getVersion() + " is activated");
             }
         });
 
-        getCommand("bluemapresidence").setExecutor(new ReloadCommand(this));
+        Objects.requireNonNull(getCommand("bluemapresidence")).setExecutor(new ReloadCommand(this));
     }
 
     @Override
     public void onDisable() {
         BlueMapAPI.onDisable(blueMapAPI -> {
-            getServer().getScheduler().cancelTasks(this);
+            if(updateTimer != null) updateTimer.cancel();
             this.blueMap = null;
         });
     }
@@ -221,10 +219,11 @@ public class Main extends JavaPlugin {
                 blueMap.getWorld(areas[i].getWorld().getUID()).ifPresent(blueWorld -> blueWorld.getMaps().forEach(map -> {
                     //Create marker set
                     final MarkerSet markerSetRes = map.getMarkerSets().getOrDefault(MarkerSetIdResidence, MarkerSet.builder().label(MarkerSetLabelResidence).build());
-                    String flags = ""; //Define string flags
+                    StringBuilder flags = new StringBuilder(); //Define string flags
                     int flagCount = 0; // Define flag count (to maxFlags config)
                     //Load config detail and register placeholders
                     String ConfDetail = getConfig().getString("marker.detail");
+                    assert ConfDetail != null;
                     ConfDetail = ConfDetail.replace("[ResName]", res.getName());
                     ConfDetail = ConfDetail.replace("[OwnerName]", res.getRPlayer().getName());
 
@@ -236,10 +235,10 @@ public class Main extends JavaPlugin {
                         toFlags = toFlags.replace("[FlagKey]", flag.getKey());
                         toFlags = toFlags.replace("[FlagValue]", flag.getValue().toString());
                         if(maxFlags != 0 && flagCount < maxFlags) { //If flags enabled and flagCount is right
-                            flags += toFlags;
+                            flags.append(toFlags);
                             flagCount++;
                         } else if(maxFlags < 0) { //Unlimited flags
-                            flags += toFlags;
+                            flags.append(toFlags);
                         }
                     }
 
@@ -348,7 +347,7 @@ public class Main extends JavaPlugin {
 
                     //Add marker to marker set
 
-                    switch (getConfig().getString("marker.type").toLowerCase()) {
+                    switch (Objects.requireNonNull(getConfig().getString("marker.type")).toLowerCase()) {
                         case "point": markerSetRes.getMarkers().put(AreaResid, pointMarker); break;
                         case "circle": markerSetRes.getMarkers().put(AreaResid, circleExtrudeMarker); break;
                         case "ellipse": markerSetRes.getMarkers().put(AreaResid, ellipseExtrudeMarker); break;
@@ -376,7 +375,8 @@ public class Main extends JavaPlugin {
     }
 
     public void refreshPl() {
-        getServer().getScheduler().runTask(this, this::refreshMarkers);
+        Scheduler.run(this::refreshMarkers);
+        //getServer().getScheduler().runTask(this, this::refreshMarkers);
     }
 
 }

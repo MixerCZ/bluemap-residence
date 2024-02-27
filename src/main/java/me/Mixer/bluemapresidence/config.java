@@ -7,18 +7,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public class config {
 
+    private final Main plugin;
 
-    private Main plugin;
     private FileConfiguration dataConfig = null;
     private File configFile = null;
 
-    private String configname = "config.yml";
+    private final String configname = "config.yml";
 
     public config(Main plugin) {
         this.plugin = plugin;
@@ -65,23 +64,6 @@ public class config {
         }
     }
 
-    public void updateToDefaultConfig(String t) {
-        if(this.configFile.exists()) {
-            File oldFile = new File(this.plugin.getDataFolder(), configname + ".old");
-
-            this.configFile.renameTo(oldFile);
-        }
-
-        if(this.configFile == null)
-            this.configFile = new File(this.plugin.getDataFolder(), configname);
-
-        if(!this.configFile.exists()) {
-            this.plugin.saveResource(configname, false);
-        }
-
-
-    }
-
     public void testCompareConfig() {
         if(!getConfig().getBoolean("config.auto_update", true)) {
             return;
@@ -106,7 +88,7 @@ public class config {
                     String value = defaultConfig.getString(key);
 
                     //Check data type and setting up key and value
-                    if(value == "true" || value == "false") {
+                    if(Objects.equals(value, "true") || Objects.equals(value, "false")) {
                         getConfig().set(key, defaultConfig.getBoolean(key));
                     } else if(isInteger(value)) {
                         getConfig().set(key, defaultConfig.getInt(key));

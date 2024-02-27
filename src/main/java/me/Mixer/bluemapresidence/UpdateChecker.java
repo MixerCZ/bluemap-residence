@@ -1,6 +1,5 @@
 package me.Mixer.bluemapresidence;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Consumer;
 
@@ -11,8 +10,8 @@ import java.util.Scanner;
 
 public class UpdateChecker {
 
-    private JavaPlugin plugin;
-    private int resourceId;
+    private final JavaPlugin plugin;
+    private final int resourceId;
 
     public UpdateChecker(JavaPlugin plugin, int resourceId) {
         this.plugin = plugin;
@@ -20,7 +19,7 @@ public class UpdateChecker {
     }
 
     public void getVersion(final Consumer<String> consumer) {
-        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+        Scheduler.runAsync(() -> {
             try (InputStream inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId).openStream(); Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
                     consumer.accept(scanner.next());
