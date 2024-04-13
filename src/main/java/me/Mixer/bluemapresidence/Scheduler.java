@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
 public final class Scheduler {
-    private static final boolean isFolia = Bukkit.getVersion().contains("Folia");
+    private static final boolean isFolia = (Bukkit.getVersion().contains("Folia") || Bukkit.getVersion().contains("Luminol"));
 
     public static void run(Runnable runnable) {
         if (isFolia)
