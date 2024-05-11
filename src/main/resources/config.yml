@@ -27,9 +27,10 @@ marker:
   #Marker type - values: rectangle (default), circle, ellipse, point
   #2D markers: rectangle2d, circle2d, ellipse2d
   type: "rectangle"
+  typeSubzone: "rectangle"
 
   #Only for 2D markers
-  Yheight: 40
+  Yheight: 60
 
   #If this is true, Y of the point marker will be set to the center of the residence
   #If this is false, Y of the point marker will be set to Yheight value

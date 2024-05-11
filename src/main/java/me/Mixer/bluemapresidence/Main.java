@@ -9,6 +9,9 @@ import de.bluecolored.bluemap.api.markers.*;
 import de.bluecolored.bluemap.api.math.Color;
 import de.bluecolored.bluemap.api.math.Shape;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.Adventure;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -17,6 +20,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -158,209 +162,221 @@ public class Main extends JavaPlugin {
         for(final String resid : resmgr.getResidenceList(true, false).toArray(new String[0])) {
             ClaimedResidence res = resmgr.getByName(resid);
             CuboidArea[] areas = res.getAreaArray();
+            List<ClaimedResidence> subzones = res.getSubzones();
+            //all areas
+            generateMarkers(areas, resid, "", res);
 
-            for(int i = 0; i < areas.length; i++) {
-                String AreaResid = resid + "%" + i; //Make area ID for cuboid
-                Location ll = areas[i].getLowLocation(); //Lowest location
-                Location lh = areas[i].getHighLocation(); //Highest location
-
-                double dist = ll.distance(lh)/2; //Get distance between ll and lh (for circle marker)
-
-                //Get distance between ll x and lh x (for ellipse marker)
-
-                double minX = ll.getX();
-                double maxX = lh.getX()+1;
-
-
-                if(minX > maxX) {
-                    minX = lh.getX();
-                    maxX = ll.getX();
-                }
-
-                //Get distance between ll z and lh z (for ellipse marker)
-
-                double minZ = ll.getZ();
-                double maxZ = lh.getZ()+1;
-
-
-                if(minZ > maxZ) {
-                    minZ = lh.getZ();
-                    maxZ = ll.getZ();
-                }
-
-                double distX = (minX - maxX) / 2;
-                double distZ = (minZ - maxZ) / 2;
-
-                double[] x = new double[2]; //Define two x points
-                float[] y = new float[2]; //Define two y points
-                double[] z = new double[2]; //Define two z points
-
-                //Get two x points
-
-                x[0] = minX;
-                x[1] = maxX;
-
-                //Get two y points
-
-                y[0] = (float) ll.getY()+1;
-                y[1] = (float) lh.getY()+1;
-
-                //Get two z points
-
-                z[0] = minZ;
-                z[1] = maxZ;
-
-                //Get center points
-
-                double centX = (x[0]+x[1])/2;
-                double centY = (y[0]+y[1])/2;
-                double centZ = (z[0]+z[1])/2;
-
-                blueMap.getWorld(areas[i].getWorld().getUID()).ifPresent(blueWorld -> blueWorld.getMaps().forEach(map -> {
-                    //Create marker set
-                    final MarkerSet markerSetRes = map.getMarkerSets().getOrDefault(MarkerSetIdResidence, MarkerSet.builder().label(MarkerSetLabelResidence).build());
-                    StringBuilder flags = new StringBuilder(); //Define string flags
-                    int flagCount = 0; // Define flag count (to maxFlags config)
-                    //Load config detail and register placeholders
-                    String ConfDetail = getConfig().getString("marker.detail");
-                    assert ConfDetail != null;
-                    ConfDetail = ConfDetail.replace("[ResName]", res.getName());
-                    ConfDetail = ConfDetail.replace("[OwnerName]", res.getRPlayer().getName());
-
-                    int maxFlags = getConfig().getInt("marker.maxFlags", -1);
-
-                    //Add all use flags to flags string
-                    for(Map.Entry<String, Boolean> flag : res.getPermissions().getFlags().entrySet()) {
-                        String toFlags = getConfig().getString("marker.flagDetail", "[FlagKey]: [FlagValue]<br>");
-                        toFlags = toFlags.replace("[FlagKey]", flag.getKey());
-                        toFlags = toFlags.replace("[FlagValue]", flag.getValue().toString());
-                        if(maxFlags != 0 && flagCount < maxFlags) { //If flags enabled and flagCount is right
-                            flags.append(toFlags);
-                            flagCount++;
-                        } else if(maxFlags < 0) { //Unlimited flags
-                            flags.append(toFlags);
-                        }
-                    }
-
-                    //Register PlaceholderAPI placeholders
-                    String newDetail = Placeholder(res.getRPlayer().getPlayer(), ConfDetail);
-                    //Add flags to res detail
-                    newDetail += flags;
-
-                    //Define Line color
-                    Color LineColor = new Color(getConfig().getInt("marker.LineColor.r", 255), getConfig().getInt("marker.LineColor.g",0), getConfig().getInt("marker.LineColor.b",0), (float) getConfig().getDouble("marker.LineColor.a",1.0));
-                    //Define fill color
-                    Color FillColor = new Color(getConfig().getInt("marker.FillColor.r", 200), getConfig().getInt("marker.FillColor.g",0), getConfig().getInt("marker.FillColor.b",0), (float) getConfig().getDouble("marker.FillColor.a",0.3));
-
-                    //Define line width
-                    int lineWidth = getConfig().getInt("marker.LineWidth", 3);
-
-                    //Define Y height
-                    int yHeight = getConfig().getInt("marker.Yheight", 3);
-
-                    boolean depthTest = getConfig().getBoolean("marker.depth-test", true);
-                    boolean centerPointer = getConfig().getBoolean("centerPointerMarkerHeight", true);
-
-                    //Create extrude rectangle marker
-                    ExtrudeMarker rectangleExtrudeMarker = ExtrudeMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .shape(Shape.createRect(x[0],z[0],x[1], z[1]),y[0], y[1])
-                            .centerPosition()
-                            .lineColor(LineColor)
-                            .fillColor(FillColor)
-                            .lineWidth(lineWidth)
-                            .depthTestEnabled(depthTest)
-                            .build();
-
-                    //Create shape rectangle marker
-                    ShapeMarker rectangleExtrudeMarker2D = ShapeMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .shape(Shape.createRect(x[0], z[0], x[1], z[1]),yHeight)
-                            .depthTestEnabled(false)
-                            .centerPosition()
-                            .lineColor(LineColor)
-                            .fillColor(FillColor)
-                            .lineWidth(lineWidth)
-                            .depthTestEnabled(depthTest)
-                            .build();
-
-                    //Create point
-                    double pointY = centY;
-                    if(centerPointer) pointY = yHeight;
-
-                    POIMarker pointMarker = POIMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .position(centX, pointY, centZ) //calculate center of res
-                            .icon(getConfig().getString("marker.icon.url", "https://raw.githubusercontent.com/BlueMap-Minecraft/BlueMap/master/BlueMapCommon/webapp/public/assets/poi.svg"), getConfig().getInt("marker.icon.anchorX"), getConfig().getInt("marker.icon.anchorY"))
-                            .build();
-
-                    //Create extrude circle marker
-                    ExtrudeMarker circleExtrudeMarker = ExtrudeMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .shape(Shape.createCircle(centX, centZ, dist, getConfig().getInt("marker.points", 100)), y[0], y[1])
-                            .centerPosition()
-                            .lineColor(LineColor)
-                            .fillColor(FillColor)
-                            .lineWidth(lineWidth)
-                            .depthTestEnabled(depthTest)
-                            .build();
-
-                    //Create shape circle marker
-                    ShapeMarker circleExtrudeMarker2D = ShapeMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .shape(Shape.createCircle(centX, centZ, dist, getConfig().getInt("marker.points", 100)), yHeight)
-                            .centerPosition()
-                            .lineColor(LineColor)
-                            .fillColor(FillColor)
-                            .lineWidth(lineWidth)
-                            .depthTestEnabled(depthTest)
-                            .build();
-
-                    //Create extrude ellipse marker
-                    ExtrudeMarker ellipseExtrudeMarker = ExtrudeMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .shape(Shape.createEllipse(centX, centZ, distX, distZ, getConfig().getInt("marker.points", 100)), y[0], y[1])
-                            .centerPosition()
-                            .lineColor(LineColor)
-                            .fillColor(FillColor)
-                            .lineWidth(lineWidth)
-                            .depthTestEnabled(depthTest)
-                            .build();
-
-                    //Create shape ellipse marker
-                    ShapeMarker ellipseExtrudeMarker2D = ShapeMarker.builder()
-                            .label(res.getName())
-                            .detail(newDetail)
-                            .shape(Shape.createEllipse(centX, centZ, distX, distZ, getConfig().getInt("marker.points", 100)), yHeight)
-                            .centerPosition()
-                            .lineColor(LineColor)
-                            .fillColor(FillColor)
-                            .lineWidth(lineWidth)
-                            .depthTestEnabled(depthTest)
-                            .build();
-
-                    //Add marker to marker set
-
-                    switch (Objects.requireNonNull(getConfig().getString("marker.type")).toLowerCase()) {
-                        case "point": markerSetRes.getMarkers().put(AreaResid, pointMarker); break;
-                        case "circle": markerSetRes.getMarkers().put(AreaResid, circleExtrudeMarker); break;
-                        case "ellipse": markerSetRes.getMarkers().put(AreaResid, ellipseExtrudeMarker); break;
-                        case "rectangle2d": markerSetRes.getMarkers().put(AreaResid, rectangleExtrudeMarker2D); break;
-                        case "circle2d": markerSetRes.getMarkers().put(AreaResid, circleExtrudeMarker2D); break;
-                        case "ellipse2d": markerSetRes.getMarkers().put(AreaResid, ellipseExtrudeMarker2D); break;
-                        default: markerSetRes.getMarkers().put(AreaResid, rectangleExtrudeMarker); break;
-                    }
-
-                    //Add marker set to map
-                    map.getMarkerSets().put(MarkerSetIdResidence, markerSetRes);
-                }));
+            //all subzones
+            for(int i = 0; i < subzones.size(); i++) {
+                generateMarkers(subzones.get(i).getAreaArray(), resid, "s", subzones.get(i));
             }
+        }
+    }
+
+    private void generateMarkers(CuboidArea[] areas, String resid, String type, ClaimedResidence res) {
+        for(int i = 0; i < areas.length; i++) {
+            String AreaResid = resid + "%" + type + i; //Make area ID for cuboid
+            Location ll = areas[i].getLowLocation(); //Lowest location
+            Location lh = areas[i].getHighLocation(); //Highest location
+
+            double dist = ll.distance(lh)/2; //Get distance between ll and lh (for circle marker)
+
+            //Get distance between ll x and lh x (for ellipse marker)
+
+            double minX = ll.getX();
+            double maxX = lh.getX()+1;
+
+
+            if(minX > maxX) {
+                minX = lh.getX();
+                maxX = ll.getX();
+            }
+
+            //Get distance between ll z and lh z (for ellipse marker)
+
+            double minZ = ll.getZ();
+            double maxZ = lh.getZ()+1;
+
+
+            if(minZ > maxZ) {
+                minZ = lh.getZ();
+                maxZ = ll.getZ();
+            }
+
+            double distX = (minX - maxX) / 2;
+            double distZ = (minZ - maxZ) / 2;
+
+            double[] x = new double[2]; //Define two x points
+            float[] y = new float[2]; //Define two y points
+            double[] z = new double[2]; //Define two z points
+
+            //Get two x points
+
+            x[0] = minX;
+            x[1] = maxX;
+
+            //Get two y points
+
+            y[0] = (float) ll.getY()+1;
+            y[1] = (float) lh.getY()+1;
+
+            //Get two z points
+
+            z[0] = minZ;
+            z[1] = maxZ;
+
+            //Get center points
+
+            double centX = (x[0]+x[1])/2;
+            double centY = (y[0]+y[1])/2;
+            double centZ = (z[0]+z[1])/2;
+
+            blueMap.getWorld(areas[i].getWorld().getUID()).ifPresent(blueWorld -> blueWorld.getMaps().forEach(map -> {
+                //Create marker set
+                final MarkerSet markerSetRes = map.getMarkerSets().getOrDefault(MarkerSetIdResidence, MarkerSet.builder().label(MarkerSetLabelResidence).build());
+                StringBuilder flags = new StringBuilder(); //Define string flags
+                int flagCount = 0; // Define flag count (to maxFlags config)
+                //Load config detail and register placeholders
+                String ConfDetail = getConfig().getString("marker.detail");
+                assert ConfDetail != null;
+                ConfDetail = ConfDetail.replace("[ResName]", res.getName());
+                ConfDetail = ConfDetail.replace("[OwnerName]", res.getRPlayer().getName());
+
+                int maxFlags = getConfig().getInt("marker.maxFlags", -1);
+
+                //Add all use flags to flags string
+                for(Map.Entry<String, Boolean> flag : res.getPermissions().getFlags().entrySet()) {
+                    String toFlags = getConfig().getString("marker.flagDetail", "[FlagKey]: [FlagValue]<br>");
+                    toFlags = toFlags.replace("[FlagKey]", flag.getKey());
+                    toFlags = toFlags.replace("[FlagValue]", flag.getValue().toString());
+                    if(maxFlags != 0 && flagCount < maxFlags) { //If flags enabled and flagCount is right
+                        flags.append(toFlags);
+                        flagCount++;
+                    } else if(maxFlags < 0) { //Unlimited flags
+                        flags.append(toFlags);
+                    }
+                }
+
+                //Register PlaceholderAPI placeholders
+                String newDetail = Placeholder(res.getRPlayer().getPlayer(), ConfDetail);
+                //Add flags to res detail
+                newDetail += flags;
+
+                //Define Line color
+                Color LineColor = new Color(getConfig().getInt("marker.LineColor.r", 255), getConfig().getInt("marker.LineColor.g",0), getConfig().getInt("marker.LineColor.b",0), (float) getConfig().getDouble("marker.LineColor.a",1.0));
+                //Define fill color
+                Color FillColor = new Color(getConfig().getInt("marker.FillColor.r", 200), getConfig().getInt("marker.FillColor.g",0), getConfig().getInt("marker.FillColor.b",0), (float) getConfig().getDouble("marker.FillColor.a",0.3));
+
+                //Define line width
+                int lineWidth = getConfig().getInt("marker.LineWidth", 3);
+
+                //Define Y height
+                int yHeight = getConfig().getInt("marker.Yheight", 60);
+
+                boolean depthTest = getConfig().getBoolean("marker.depth-test", true);
+                boolean centerPointer = getConfig().getBoolean("centerPointerMarkerHeight", true);
+
+                //Create extrude rectangle marker
+                ExtrudeMarker rectangleExtrudeMarker = ExtrudeMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .shape(Shape.createRect(x[0],z[0],x[1], z[1]),y[0], y[1])
+                        .centerPosition()
+                        .lineColor(LineColor)
+                        .fillColor(FillColor)
+                        .lineWidth(lineWidth)
+                        .depthTestEnabled(depthTest)
+                        .build();
+
+                //Create shape rectangle marker
+                ShapeMarker rectangleExtrudeMarker2D = ShapeMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .shape(Shape.createRect(x[0], z[0], x[1], z[1]),yHeight)
+                        .depthTestEnabled(false)
+                        .centerPosition()
+                        .lineColor(LineColor)
+                        .fillColor(FillColor)
+                        .lineWidth(lineWidth)
+                        .depthTestEnabled(depthTest)
+                        .build();
+
+                //Create point
+                double pointY = centY;
+                if(centerPointer) pointY = yHeight;
+
+                POIMarker pointMarker = POIMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .position(centX, pointY, centZ) //calculate center of res
+                        .icon(getConfig().getString("marker.icon.url", "https://raw.githubusercontent.com/BlueMap-Minecraft/BlueMap/master/BlueMapCommon/webapp/public/assets/poi.svg"), getConfig().getInt("marker.icon.anchorX"), getConfig().getInt("marker.icon.anchorY"))
+                        .build();
+
+                //Create extrude circle marker
+                ExtrudeMarker circleExtrudeMarker = ExtrudeMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .shape(Shape.createCircle(centX, centZ, dist, getConfig().getInt("marker.points", 100)), y[0], y[1])
+                        .centerPosition()
+                        .lineColor(LineColor)
+                        .fillColor(FillColor)
+                        .lineWidth(lineWidth)
+                        .depthTestEnabled(depthTest)
+                        .build();
+
+                //Create shape circle marker
+                ShapeMarker circleExtrudeMarker2D = ShapeMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .shape(Shape.createCircle(centX, centZ, dist, getConfig().getInt("marker.points", 100)), yHeight)
+                        .centerPosition()
+                        .lineColor(LineColor)
+                        .fillColor(FillColor)
+                        .lineWidth(lineWidth)
+                        .depthTestEnabled(depthTest)
+                        .build();
+
+                //Create extrude ellipse marker
+                ExtrudeMarker ellipseExtrudeMarker = ExtrudeMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .shape(Shape.createEllipse(centX, centZ, distX, distZ, getConfig().getInt("marker.points", 100)), y[0], y[1])
+                        .centerPosition()
+                        .lineColor(LineColor)
+                        .fillColor(FillColor)
+                        .lineWidth(lineWidth)
+                        .depthTestEnabled(depthTest)
+                        .build();
+
+                //Create shape ellipse marker
+                ShapeMarker ellipseExtrudeMarker2D = ShapeMarker.builder()
+                        .label(res.getName())
+                        .detail(newDetail)
+                        .shape(Shape.createEllipse(centX, centZ, distX, distZ, getConfig().getInt("marker.points", 100)), yHeight)
+                        .centerPosition()
+                        .lineColor(LineColor)
+                        .fillColor(FillColor)
+                        .lineWidth(lineWidth)
+                        .depthTestEnabled(depthTest)
+                        .build();
+
+                //Add marker to marker set
+
+                String mtype = "marker.type";
+                if(type == "s") mtype = "marker.typeSubzone";
+                switch (Objects.requireNonNull(getConfig().getString(mtype)).toLowerCase()) {
+                    case "point": markerSetRes.getMarkers().put(AreaResid, pointMarker); break;
+                    case "circle": markerSetRes.getMarkers().put(AreaResid, circleExtrudeMarker); break;
+                    case "ellipse": markerSetRes.getMarkers().put(AreaResid, ellipseExtrudeMarker); break;
+                    case "rectangle2d": markerSetRes.getMarkers().put(AreaResid, rectangleExtrudeMarker2D); break;
+                    case "circle2d": markerSetRes.getMarkers().put(AreaResid, circleExtrudeMarker2D); break;
+                    case "ellipse2d": markerSetRes.getMarkers().put(AreaResid, ellipseExtrudeMarker2D); break;
+                    default: markerSetRes.getMarkers().put(AreaResid, rectangleExtrudeMarker); break;
+                }
+
+                //Add marker set to map
+                map.getMarkerSets().put(MarkerSetIdResidence, markerSetRes);
+            }));
         }
     }
 
