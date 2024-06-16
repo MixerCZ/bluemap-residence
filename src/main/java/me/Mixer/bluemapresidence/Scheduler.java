@@ -5,10 +5,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
 public final class Scheduler {
-    private static final boolean isFolia = (Bukkit.getVersion().contains("Folia") || Bukkit.getVersion().contains("Luminol"));
+
+    private static boolean isFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true;
+        } catch (ClassNotFoundException e) {
+            if (Bukkit.getVersion().contains("Folia") || Bukkit.getVersion().contains("Luminol")) return true;
+            return false;
+        }
+    }
 
     public static void run(Runnable runnable) {
-        if (isFolia)
+        if (isFolia())
             Bukkit.getGlobalRegionScheduler()
                     .execute(Main.getInstance(), runnable);
 
@@ -17,7 +26,7 @@ public final class Scheduler {
     }
 
     public static Task runTimer(Runnable runnable, long delayTicks, long periodTicks) {
-        if (isFolia)
+        if (isFolia())
             return new Task(Bukkit.getGlobalRegionScheduler()
                     .runAtFixedRate(Main.getInstance(), t -> runnable.run(), delayTicks < 1 ? 1 : delayTicks, periodTicks));
 
@@ -26,7 +35,7 @@ public final class Scheduler {
     }
 
     public static Task runAsync(Runnable runnable) {
-        if (isFolia)
+        if (isFolia())
             return new Task(Bukkit.getAsyncScheduler().runNow(Main.getInstance(), t -> runnable.run()));
         else return new Task(Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), runnable));
     }
