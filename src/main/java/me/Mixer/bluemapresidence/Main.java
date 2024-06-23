@@ -77,7 +77,7 @@ public class Main extends JavaPlugin {
         MarkerSetLabelResidence = getConfig().getString("marker.name", "Residences");
         MarkerSetLabelSubzones = getConfig().getString("marker.subzone.name", "Residences");
         new UpdateChecker(this, 107389).getVersion(version -> {
-            if (!this.getPluginMeta().getVersion().equalsIgnoreCase(version)) {
+            if (!this.getDescription().getVersion().equalsIgnoreCase(version)) {
                 info("There is a new update available. " + BMResLinkSpigot);
             }
         });
@@ -138,7 +138,7 @@ public class Main extends JavaPlugin {
                 if(getConfig().getBoolean("update.onchange", true)) {
                     pm.registerEvents(new EventList(this), this);
                 }
-                info("Version " + this.getPluginMeta().getVersion() + " is activated");
+                info("Version " + this.getDescription().getVersion() + " is activated");
             }
         });
 

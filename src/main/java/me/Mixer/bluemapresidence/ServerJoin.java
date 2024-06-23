@@ -16,7 +16,7 @@ public class ServerJoin implements Listener {
 	public void Join(PlayerJoinEvent e)  {
 		if(e.getPlayer().hasPermission("blueres.updatecheck")) {
 			new UpdateChecker(plugin, 107389).getVersion(version -> {
-				if(!plugin.getPluginMeta().getVersion().equalsIgnoreCase(version)) {
+				if(!plugin.getDescription().getVersion().equalsIgnoreCase(version)) {
 					e.getPlayer().sendMessage(plugin.Placeholder(e.getPlayer(), ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("messages.new_update", "New update available."))));
 					e.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', "&a" + plugin.BMResLinkSpigot));
 				}
