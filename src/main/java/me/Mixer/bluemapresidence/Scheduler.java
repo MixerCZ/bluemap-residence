@@ -1,5 +1,6 @@
 package me.Mixer.bluemapresidence;
 
+import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -27,6 +28,7 @@ public final class Scheduler {
 
     public static Task runTimer(Runnable runnable, long delayTicks, long periodTicks) {
         if (isFolia())
+
             return new Task(Bukkit.getGlobalRegionScheduler()
                     .runAtFixedRate(Main.getInstance(), t -> runnable.run(), delayTicks < 1 ? 1 : delayTicks, periodTicks));
 

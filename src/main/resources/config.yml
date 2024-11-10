@@ -114,6 +114,212 @@ marker:
       anchorX: 25
       anchorY: 45
 
+# Same settings as the marker, but this is for a residence for sale
+marker-For_Sale:
+  # Set marker detail (displayed on click) - placeholders: [ResName], [OwnerName]
+  # Alsa you can use basic html tags like <i></i> for italic, <b></b> for bold or <br> for break
+  detail: "<b>[ResName]</b> owned by [OwnerName]<br><br><b>Flags:</b><br>"
+
+  # Set max flags which can display
+  # Set to 0 to disable flags or -1 to unlimited
+  maxFlags: -1
+
+  # Set flag detail (displayed on click) - placeholders: [FlagKey], [FlagValue]
+  # Alsa you can use basic html tags like <i></i> for italic, <b></b> for bold or <br> for break
+  flagDetail: "[FlagKey]: [FlagValue]<br>"
+
+  #Marker type - values: rectangle (default), circle, ellipse, point
+  #2D markers: rectangle2d, circle2d, ellipse2d
+  type: "rectangle"
+
+  #Only for 2D markers
+  Yheight: 60
+
+  #If this is true, Y of the point marker will be set to the center of the residence
+  #If this is false, Y of the point marker will be set to Yheight value
+  centerPointerMarkerHeight: true
+
+  #If this is false the marker will always render above all other (hires) terrain.
+  #If it’s true, hires tiles will be able to cover the marker if they are in front of it
+  #I recommend to use it with 2D markers
+  depth-test: true
+
+  #Points to make circle or ellipse (default 100)
+  points: 100
+
+  #Set line color (no use for point marker)
+  LineColor:
+    #Red
+    r: 255
+    #Green
+    g: 0
+    #Blue
+    b: 0
+    #Alpha (transparency)
+    a: 1.0
+
+  #Set fill color (no use for point marker)
+  FillColor:
+    #Red
+    r: 200
+    #Green
+    g: 0
+    #Blue
+    b: 0
+    #Alpha (transparency)
+    a: 0.3
+
+  LineWidth: 3
+
+  #Icon URL - ONLY FOR MARKER TYPE POINT
+  icon:
+    url: "https://raw.githubusercontent.com/BlueMap-Minecraft/BlueMap/master/BlueMapCommon/webapp/public/assets/poi.svg"
+
+    #Offset X
+    anchorX: 25
+
+    #Offset Y
+    anchorY: 45
+
+  #Same config, but for the subzones
+  subzone:
+    detail: "<b>[ResName]</b> owned by [OwnerName]<br><br><b>Flags:</b><br>"
+    maxFlags: -1
+
+    flagDetail: "[FlagKey]: [FlagValue]<br>"
+
+    #Marker type - values: rectangle (default), circle, ellipse, point
+    #2D markers: rectangle2d, circle2d, ellipse2d
+    type: "rectangle"
+
+    Yheight: 60
+    centerPointerMarkerHeight: true
+
+    depth-test: true
+
+    points: 100
+
+    LineColor:
+      r: 255
+      g: 0
+      b: 0
+      a: 1.0
+
+    FillColor:
+      r: 200
+      g: 0
+      b: 0
+      a: 0.3
+
+    LineWidth: 3
+    icon:
+      url: "https://raw.githubusercontent.com/BlueMap-Minecraft/BlueMap/master/BlueMapCommon/webapp/public/assets/poi.svg"
+      anchorX: 25
+      anchorY: 45
+
+# Same settings as the marker, but this is for a residence for rent
+marker-For_Rent:
+  # Set marker detail (displayed on click) - placeholders: [ResName], [OwnerName]
+  # Alsa you can use basic html tags like <i></i> for italic, <b></b> for bold or <br> for break
+  detail: "<b>[ResName]</b> owned by [OwnerName]<br><br><b>Flags:</b><br>"
+
+  # Set max flags which can display
+  # Set to 0 to disable flags or -1 to unlimited
+  maxFlags: -1
+
+  # Set flag detail (displayed on click) - placeholders: [FlagKey], [FlagValue]
+  # Alsa you can use basic html tags like <i></i> for italic, <b></b> for bold or <br> for break
+  flagDetail: "[FlagKey]: [FlagValue]<br>"
+
+  #Marker type - values: rectangle (default), circle, ellipse, point
+  #2D markers: rectangle2d, circle2d, ellipse2d
+  type: "rectangle"
+
+  #Only for 2D markers
+  Yheight: 60
+
+  #If this is true, Y of the point marker will be set to the center of the residence
+  #If this is false, Y of the point marker will be set to Yheight value
+  centerPointerMarkerHeight: true
+
+  #If this is false the marker will always render above all other (hires) terrain.
+  #If it’s true, hires tiles will be able to cover the marker if they are in front of it
+  #I recommend to use it with 2D markers
+  depth-test: true
+
+  #Points to make circle or ellipse (default 100)
+  points: 100
+
+  #Set line color (no use for point marker)
+  LineColor:
+    #Red
+    r: 255
+    #Green
+    g: 0
+    #Blue
+    b: 0
+    #Alpha (transparency)
+    a: 1.0
+
+  #Set fill color (no use for point marker)
+  FillColor:
+    #Red
+    r: 200
+    #Green
+    g: 0
+    #Blue
+    b: 0
+    #Alpha (transparency)
+    a: 0.3
+
+  LineWidth: 3
+
+  #Icon URL - ONLY FOR MARKER TYPE POINT
+  icon:
+    url: "https://raw.githubusercontent.com/BlueMap-Minecraft/BlueMap/master/BlueMapCommon/webapp/public/assets/poi.svg"
+
+    #Offset X
+    anchorX: 25
+
+    #Offset Y
+    anchorY: 45
+
+  #Same config, but for the subzones
+  subzone:
+    detail: "<b>[ResName]</b> owned by [OwnerName]<br><br><b>Flags:</b><br>"
+    maxFlags: -1
+
+    flagDetail: "[FlagKey]: [FlagValue]<br>"
+
+    #Marker type - values: rectangle (default), circle, ellipse, point
+    #2D markers: rectangle2d, circle2d, ellipse2d
+    type: "rectangle"
+
+    Yheight: 60
+    centerPointerMarkerHeight: true
+
+    depth-test: true
+
+    points: 100
+
+    LineColor:
+      r: 255
+      g: 0
+      b: 0
+      a: 1.0
+
+    FillColor:
+      r: 200
+      g: 0
+      b: 0
+      a: 0.3
+
+    LineWidth: 3
+    icon:
+      url: "https://raw.githubusercontent.com/BlueMap-Minecraft/BlueMap/master/BlueMapCommon/webapp/public/assets/poi.svg"
+      anchorX: 25
+      anchorY: 45
+
 config:
   # Sets whether new settings should automatically appear in config
   auto_update: true
