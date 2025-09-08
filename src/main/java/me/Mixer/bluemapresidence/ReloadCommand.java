@@ -26,7 +26,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        cfg.reloadConfig();
+        cfg.reloadConfigCache();
         cfg.refreshPl();
 
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', cfg.getConfig().getString("messages.reload_successfully", "Reloaded successfully.")));
