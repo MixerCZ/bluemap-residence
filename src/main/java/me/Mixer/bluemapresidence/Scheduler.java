@@ -1,6 +1,5 @@
 package me.Mixer.bluemapresidence;
 
-import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
